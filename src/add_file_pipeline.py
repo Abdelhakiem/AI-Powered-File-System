@@ -10,6 +10,8 @@ from transformers import CLIPProcessor, CLIPModel
 from transformers import BlipProcessor, BlipForImageTextRetrieval, BlipForConditionalGeneration
 import numpy as np
 import torch
+import os
+import shutil
 
 
 IMG_TXT_PATH = "../models/img_to_text/"
@@ -19,6 +21,8 @@ LOCAL_CAPTION_DIR = "../models/img_caption"
 LOCAL_RETRIEVAL_DIR    = "../models/embedding"
 
 FILE_STORING_PATH ='../files_DB'
+FILE_SYSTEM_PATH  = '../File_System_Simulation'
+
 # Choose device (GPU if available):
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -110,10 +114,46 @@ def generate_file_id(file_path) -> str:
 def store_Vdb(V_db,emd,meta_data):
     pass
 
-def store_file (file_id, file, file_type):
-    pass
+def store_file(file_id: str, original_file_path: str, file_type: str):
+    # Create storage directory if it doesn't exist
+    os.makedirs(FILE_STORING_PATH, exist_ok=True)
+    
+    # Get the original file extension
+    original_path = Path(original_file_path)
+    file_extension = original_path.suffix.lower()
+    
+    # Handle files without extensions
+    if not file_extension:
+        if file_type == 'image':
+            file_extension = '.jpg'  # Default image format
+        else:
+            file_extension = '.txt'  # Default text format
+    
+    # Create storage path with file_id + original extension
+    storage_path = os.path.join(FILE_STORING_PATH, f"{file_id}{file_extension}")
+    
+    # Copy the file to storage
+    try:
+        if file_type == 'image':
+            # For images, we use the processed version to maintain RGB format
+            with Image.open(original_file_path) as img:
+                img = img.convert('RGB')
+                img.save(storage_path)
+            print(f"Stored image: {storage_path}")
+        else:
+            # For text files, copy the original content
+            shutil.copy2(original_file_path, storage_path)
+            print(f"Stored text: {storage_path}")
+    except Exception as e:
+        print(f"Error storing file {original_file_path}: {e}")
+        return None
+    
+    return storage_path
+        
 
-def add_file_pipeline(file, file_path):
+def add_file_pipeline( file_path):
+    loading_file_path = os.path.join(FILE_SYSTEM_PATH, file_path)
+    file = None
     # 0. Load models: 
     summarizer, caption_processor, caption_model, emb_processor, emb_model = load_models()
     
@@ -124,32 +164,49 @@ def add_file_pipeline(file, file_path):
 
     # Process based on file type
     if file_type == 'image':
-        content = image_to_caption(file, caption_processor, caption_model)
-        emb_vec = image_to_vector(file, emb_model, emb_processor)
+        try:
+            with Image.open(file_path) as img:
+                global file
+                file = img
+                img = img.convert('RGB')
+                content = image_to_caption(img, caption_processor, caption_model)
+                emb_vec = image_to_vector(img, emb_model, emb_processor)
+        except Exception as e:
+            print(f"Error processing image {file_path}: {e}")
+            return None
             
     elif file_type == 'text':
-        content = summarize_text_file(summarizer, file)
-        emb_vec = text_to_vector(file, emb_model, emb_processor)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                global file
+                file = f
+
+                full_text = f.read()
+                content = summarize_text_file(summarizer, full_text)
+                emb_vec = text_to_vector(full_text, emb_model, emb_processor)
+        except Exception as e:
+            print(f"Error processing text file {file_path}: {e}")
+            return None
             
     else:
         print(f"Skipping unsupported file type: {file_path}")
         return None
     
-    # Prepare metadata
+
+    # TODO: storing file in DB + file_id
+    storage_path = store_file(file_id, original_file_path =loading_file_path , file_type)
+
+    # TODO: store: text_embedding,metadata
     metadata = {
         'file_id': file_id,
         'file_name': file_name,
         'file_path': str(Path(file_path).resolve()),
         'file_type': file_type,
-        'content': content
+        'content': content,
+        'storage_path' : storage_path
     }
-
-    # TODO: storing file in DB + file_id
-    store_file(file_id, file, file_type)
-
-    # TODO: store: text_embedding,file_name, file_path, file_id
     
-    pass
+    
 
 
 # ==== Example usage ====
