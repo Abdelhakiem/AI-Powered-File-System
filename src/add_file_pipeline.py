@@ -2,6 +2,9 @@ from PIL import Image
 from transformers  import BlipProcessor, BlipForConditionalGeneration
 from pathlib import Path
 import mimetypes
+import hashlib
+from pathlib import Path
+import faiss
 
 
 IMG_TXT_PATH = "../models/img_to_text/"
@@ -21,6 +24,26 @@ def img_to_text(img, model, processor )->str:
 def is_image(file_path):
     pass
 
+def check_file_type(file_path) -> str:
+    file_path = Path(file_path)
+    mime_type, _ = mimetypes.guess_type(file_path)
+    
+    if mime_type:
+        if mime_type.startswith("image/"):
+            return "image"
+        elif mime_type.startswith("text/"):
+            return "text"
+    return "unknown"
+
+def generate_file_id(file_path) -> str:
+    file_path = Path(file_path)
+    path_hash = hashlib.md5(str(file_path.resolve()).encode()).hexdigest()[:8]
+    return f"{file_path.stem}_{path_hash}"
+
+
+def store_Vdb(V_db,emd,meta_data):
+
+    
 
 def add_file_pipeline(file_path):
     file_path = Path(file_path)
@@ -43,7 +66,7 @@ def add_file_pipeline(file_path):
     # TEXT
     elif extension in {".txt", ".md", ".csv"}:
         raw = file_path.read_text(encoding="utf-8")
-        # text = text_to_summary(raw, summarizer)
+        #text = text_to_summary(raw, summarizer)
 
     else:
         raise ValueError(f"Unsupported file type: {extension}")
@@ -54,9 +77,12 @@ def add_file_pipeline(file_path):
     # TODO: storing file in DB + file_id
 
     # TODO: store: text_embedding,file_name, file_path, file_id
+    store_Vdb(V_db,emd,meta_data)
     pass
 
 
 # ==== Example usage ====
 if __name__ == "__main__":
-    pass
+    f_path="/teamspace/studios/this_studio/AI-Powered-File-System/tests/test_data.py"
+    print(f"Type :{check_file_type(f_path)}")
+    print(f"Gen_ID : {generate_file_id(f_path)}")
