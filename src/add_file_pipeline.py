@@ -59,15 +59,15 @@ def add_file_pipeline(file_path):
         "file_path": str(file_path),
     }
     # IMAGE
-    if mime_type and mime_type.startswith("image"):
+    file_type=check_file_type (meta['file_path'])
+    if file_type=='image':
         img = Image.open(file_path).convert("RGB")
         text = img_to_text(img , model = img_txt_model, processor= img_txt_processor)
-
-    # TEXT
-    elif extension in {".txt", ".md", ".csv"}:
+        meta['file_id']=generate_file_id(meta['file_path'])
+    elif file_type=='text':
         raw = file_path.read_text(encoding="utf-8")
         #text = text_to_summary(raw, summarizer)
-
+        meta['file_id']=generate_file_id(meta['file_path'])
     else:
         raise ValueError(f"Unsupported file type: {extension}")
     
@@ -77,7 +77,6 @@ def add_file_pipeline(file_path):
     # TODO: storing file in DB + file_id
 
     # TODO: store: text_embedding,file_name, file_path, file_id
-    store_Vdb(V_db,emd,meta_data)
     pass
 
 
