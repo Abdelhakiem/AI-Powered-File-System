@@ -12,6 +12,11 @@ import numpy as np
 import torch
 import os
 import shutil
+import os
+import json
+import faiss
+import numpy as np
+from pathlib import Path
 
 
 IMG_TXT_PATH = "../models/img_to_text/"
@@ -22,6 +27,12 @@ LOCAL_RETRIEVAL_DIR    = "../models/embedding"
 
 FILE_STORING_PATH ='../files_DB'
 FILE_SYSTEM_PATH  = '../File_System_Simulation'
+VECTOR_DB_PATH = '../vectorDB'
+INDEX_FILE = os.path.join(VECTOR_DB_PATH, "file_index.faiss")
+METADATA_FILE = os.path.join(VECTOR_DB_PATH, "index_metadata.json")
+
+index = None
+metadata_list = []
 
 # Choose device (GPU if available):
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -111,8 +122,96 @@ def generate_file_id(file_path) -> str:
     return f"{file_path.stem}_{path_hash}"
 
 
-def store_Vdb(V_db,emd,meta_data):
-    pass
+def load_or_create_vector_db():
+    global index, metadata_list
+    os.makedirs(VECTOR_DB_PATH, exist_ok=True)
+    # Check if database exists
+    if os.path.exists(INDEX_FILE) and os.path.exists(METADATA_FILE):
+        print("Loading existing vector database...")
+        try:
+            # Load FAISS index
+            index = faiss.read_index(INDEX_FILE)
+            
+            # Load metadata
+            with open(METADATA_FILE, 'r') as f:
+                metadata_list = json.load(f)
+                
+            print(f"Loaded vector DB with {index.ntotal} entries")
+        except Exception as e:
+            print(f"Error loading vector DB: {e}")
+            create_new_vector_db()
+    else:
+        print("Creating new vector database...")
+        create_new_vector_db()
+        
+    return index, metadata_list
+
+def create_new_vector_db():
+    """Create a new empty vector database"""
+    global index, metadata_list
+    dimension = 512  # CLIP embedding dimension
+    index = faiss.IndexFlatL2(dimension)
+    metadata_list = []
+    save_vector_db()
+    print(f"Created new vector DB with dimension {dimension}")
+
+
+def save_vector_db():
+    """Save the vector database to disk"""
+    try:
+        # Save FAISS index
+        faiss.write_index(index, INDEX_FILE)
+        
+        # Save metadata
+        with open(METADATA_FILE, 'w') as f:
+            json.dump(metadata_list, f, indent=2)
+            
+        print(f"Saved vector DB with {index.ntotal} entries")
+    except Exception as e:
+        print(f"Error saving vector DB: {e}")
+
+def store_embedding(embedding: np.ndarray, meta_data: dict):
+    """
+    Store embedding and metadata in vector database
+    
+    Args:
+        embedding: Embedding vector (1D numpy array)
+        meta_data: Metadata dictionary
+    """
+    global index, metadata_list
+    
+    # Ensure embedding is in correct format
+    if len(embedding.shape) == 1:
+        embedding = embedding.reshape(1, -1)
+    
+    # Add to index
+    index.add(embedding.astype('float32'))
+    
+    # Add to metadata
+    metadata_list.append(meta_data)
+    
+    # Save to disk
+    save_vector_db()
+    
+    print(f"Stored embedding for: {meta_data['file_name']}")
+
+from typing import List, Dict, Tuple
+
+# Update the store_Vdb function
+def store_Vdb(embedding: np.ndarray, meta_data: dict):
+    """Store in vector database (actual implementation)"""
+    global index, metadata_list
+    
+    # Load DB if not already loaded
+    if index is None:
+        index, metadata_list = load_or_create_vector_db()
+    
+    # Store the embedding
+    store_embedding(embedding, meta_data)
+    
+    return True
+    
+
 
 def store_file(file_id: str, original_file_path: str, file_type: str):
     # Create storage directory if it doesn't exist
@@ -152,8 +251,8 @@ def store_file(file_id: str, original_file_path: str, file_type: str):
         
 
 def add_file_pipeline( file_path):
+    load_or_create_vector_db()
     loading_file_path = os.path.join(FILE_SYSTEM_PATH, file_path)
-    file = None
     # 0. Load models: 
     summarizer, caption_processor, caption_model, emb_processor, emb_model = load_models()
     
@@ -165,22 +264,17 @@ def add_file_pipeline( file_path):
     # Process based on file type
     if file_type == 'image':
         try:
-            with Image.open(file_path) as img:
-                global file
-                file = img
+            with Image.open(loading_file_path) as img:
                 img = img.convert('RGB')
                 content = image_to_caption(img, caption_processor, caption_model)
                 emb_vec = image_to_vector(img, emb_model, emb_processor)
         except Exception as e:
-            print(f"Error processing image {file_path}: {e}")
+            print(f"Error processing image {loading_file_path}: {e}")
             return None
             
     elif file_type == 'text':
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                global file
-                file = f
-
+            with open(loading_file_path, 'r', encoding='utf-8') as f:
                 full_text = f.read()
                 content = summarize_text_file(summarizer, full_text)
                 emb_vec = text_to_vector(full_text, emb_model, emb_processor)
@@ -193,24 +287,25 @@ def add_file_pipeline( file_path):
         return None
     
 
-    # TODO: storing file in DB + file_id
-    storage_path = store_file(file_id, original_file_path =loading_file_path , file_type)
+    # storage_path = store_file(file_id, original_file_path =loading_file_path , file_type =file_type)
 
-    # TODO: store: text_embedding,metadata
-    metadata = {
-        'file_id': file_id,
-        'file_name': file_name,
-        'file_path': str(Path(file_path).resolve()),
-        'file_type': file_type,
-        'content': content,
-        'storage_path' : storage_path
-    }
+    # metadata = {
+    #     'file_id': file_id,
+    #     'file_name': file_name,
+    #     'file_path': str(Path(file_path).resolve()),
+    #     'file_type': file_type,
+    #     'content': content,
+    #     'storage_path' : storage_path
+    # }
+    # store_Vdb(emb_vec, metadata)
+
+
+
     
     
 
 
 # ==== Example usage ====
 if __name__ == "__main__":
-    f_path="/teamspace/studios/this_studio/AI-Powered-File-System/tests/test_data.py"
-    print(f"Type :{check_file_type(f_path)}")
-    print(f"Gen_ID : {generate_file_id(f_path)}")
+    f_path="football.png"
+    add_file_pipeline(f_path)
