@@ -31,7 +31,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
 
 # Serve the model
-CMD python server.py
+CMD python /src/server.py
 
 # Expose the port
 EXPOSE ${PORT}
