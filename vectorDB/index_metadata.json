@@ -1,18 +1,50 @@
 [
   {
-    "file_id": "football_c0247986",
-    "file_name": "football.png",
-    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/football.png",
-    "file_type": "image",
-    "content": "two young boys playing soccer on a field",
-    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/football_c0247986.png"
+    "file_id": "swimming_de18782b",
+    "file_name": "swimming.txt",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/swimming.txt",
+    "file_type": "text",
+    "content": "Swimming is both a recreational activity and a competitive sport that promotes fitness, endurance, and relaxation. It involves moving through water using various strokes, such as freestyle, breaststroke, backstroke, and butterfly. As a low-impact exercise, swimming is especially beneficial for rehabilitation and",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/swimming_de18782b.txt"
   },
   {
-    "file_id": "sea_22f183e0",
+    "file_id": "football_866089ce",
+    "file_name": "football.png",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/dir1/football.png",
+    "file_type": "image",
+    "content": "two young boys playing soccer on a field",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/football_866089ce.png"
+  },
+  {
+    "file_id": "statistical_testing_5e5a9bd1",
+    "file_name": "statistical_testing.txt",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/dir1/statistical_testing.txt",
+    "file_type": "text",
+    "content": "Statistical testing is a crucial method used to analyze data and make informed conclusions about populations based on samples. It involves applying mathematical techniques to determine whether observed patterns or relationships are significant or merely due to chance. Common statistical tests, such as t-tests, chi-square tests, and",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/statistical_testing_5e5a9bd1.txt"
+  },
+  {
+    "file_id": "football_c0f32165",
+    "file_name": "football.txt",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/dir1/football.txt",
+    "file_type": "text",
+    "content": "Football, known as soccer in some regions, is the world's most popular sport, captivating billions of fans across continents. It is a game of skill, strategy, and teamwork, where two teams compete to score goals by maneuvering the ball with their feet. From local neighborhood matches",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/football_c0f32165.txt"
+  },
+  {
+    "file_id": "sea_c3e61248",
     "file_name": "sea.png",
-    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/sea.png",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/dir2/sea.png",
     "file_type": "image",
     "content": "a beach with waves and clouds",
-    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/sea_22f183e0.png"
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/sea_c3e61248.png"
+  },
+  {
+    "file_id": "math_8a30cdef",
+    "file_name": "math.txt",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/dir2/math.txt",
+    "file_type": "text",
+    "content": "Mathematics is the foundation of logic, patterns, and problem-solving, shaping our understanding of the world. It encompasses numbers, equations, geometry, and abstract concepts that influence science, technology, and everyday life. From calculating finances to exploring the mysteries of the universe, mathematics",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/math_8a30cdef.txt"
   }
 ]

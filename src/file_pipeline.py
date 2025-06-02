@@ -10,7 +10,6 @@ from transformers import CLIPProcessor, CLIPModel
 from transformers import BlipProcessor, BlipForImageTextRetrieval, BlipForConditionalGeneration
 import numpy as np
 import torch
-import os
 import shutil
 import os
 import json
@@ -108,7 +107,7 @@ def image_to_caption(image: Image.Image,caption_processor, caption_model , max_l
 
 
 def summarize_text_file(summarizer, text):
-    return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
+    return summarizer(text, max_length=60, min_length=30, do_sample=False)[0]['summary_text']
 
 
 def check_file_type(file_path) -> str:
@@ -256,6 +255,7 @@ def store_file(file_id: str, original_file_path: str, file_type: str):
     return storage_path
         
 
+
 def add_file_pipeline( file_path):
     load_or_create_vector_db()
     loading_file_path = os.path.join(FILE_SYSTEM_PATH, file_path)
@@ -283,7 +283,7 @@ def add_file_pipeline( file_path):
             with open(loading_file_path, 'r', encoding='utf-8') as f:
                 full_text = f.read()
                 content = summarize_text_file(summarizer, full_text)
-                emb_vec = text_to_vector(full_text, emb_model, emb_processor)
+                emb_vec = text_to_vector(content, emb_model, emb_processor)
         except Exception as e:
             print(f"Error processing text file {file_path}: {e}")
             return None
@@ -308,11 +308,42 @@ def add_file_pipeline( file_path):
 
 
 
-    
-    
+def list_files_recursive(root_path):
+    """
+    Return a list of all files under `root_path`, with each path given
+    relative to `root_path` itself.
+
+    Parameters
+    ----------
+    root_path : str
+        The directory from which to start the recursive search.
+
+    Returns
+    -------
+    List[str]
+        A list of file paths (as strings), each relative to `root_path`.
+        e.g. if root_path = "/home/user/project", and there is a file
+        "/home/user/project/src/main.py", this list will contain "src/main.py".
+    """
+    result = []
+    # os.walk traverses dirpath, dirnames, filenames in a top-down manner
+    for dirpath, dirnames, filenames in os.walk(root_path):
+        for filename in filenames:
+            full_path = os.path.join(dirpath, filename)
+            # Compute the path relative to the root_path
+            rel_path = os.path.relpath(full_path, start=root_path)
+            # Normalize to use forward slashes even on Windows (optional)
+            result.append(rel_path)
+    return result
+
+def process_all_files(root_path):
+    rel_file_paths = list_files_recursive(root_path)
+    for rel_file_path in rel_file_paths:
+        print('Processing file: ', rel_file_path)
+        add_file_pipeline( rel_file_path)
+
 
 
 # ==== Example usage ====
 if __name__ == "__main__":
-    f_path="sea.png"
-    add_file_pipeline(f_path)
+    process_all_files('../File_System_Simulation')
