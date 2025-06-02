@@ -4,6 +4,7 @@ import os
 import sys
 from file_pipeline import add_file_pipeline 
 from get_relevant_files import semantic_search_engine
+from file_system_restructure import cluster_files
 from pydantic import BaseModel
 
 # Add the directory containing your semantic search module to Python path
@@ -91,6 +92,11 @@ async def search_files(request: SearchRequest):
             status_code=500,
             detail=f"Search failed: {str(e)}"
         )
+
+@app.post("/restructure_file_system")
+async def predict_attrition(employee_data):
+    cluster_files()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api_main:app", host="0.0.0.0", port=8000, reload=True)
