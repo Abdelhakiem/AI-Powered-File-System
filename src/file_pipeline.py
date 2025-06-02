@@ -273,7 +273,7 @@ def add_file_pipeline( file_path):
             with Image.open(loading_file_path) as img:
                 img = img.convert('RGB')
                 content = image_to_caption(img, caption_processor, caption_model)
-                emb_vec = image_to_vector(img, emb_model, emb_processor)
+                emb_vec = text_to_vector(content, emb_model, emb_processor)
         except Exception as e:
             print(f"Error processing image {loading_file_path}: {e}")
             return None

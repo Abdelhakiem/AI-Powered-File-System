@@ -119,6 +119,6 @@ def semantic_search_engine(search_query: str):
 
 # ==== Example usage ====
 if __name__ == "__main__":
-    search_query = "sea with blue sky"
+    search_query = "playing a sport"
     results = semantic_search_engine(search_query)
     print("Search results:", results)
