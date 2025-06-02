@@ -1,0 +1,18 @@
+[
+  {
+    "file_id": "football_c0247986",
+    "file_name": "football.png",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/football.png",
+    "file_type": "image",
+    "content": "two young boys playing soccer on a field",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/football_c0247986.png"
+  },
+  {
+    "file_id": "sea_22f183e0",
+    "file_name": "sea.png",
+    "file_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/sea.png",
+    "file_type": "image",
+    "content": "a beach with waves and clouds",
+    "storage_path": "/teamspace/studios/this_studio/AI-Powered-File-System/src/../files_DB/sea_22f183e0.png"
+  }
+]
