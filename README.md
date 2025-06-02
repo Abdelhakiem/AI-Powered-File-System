@@ -14,9 +14,6 @@ This repository implements a semantic file system that automatically captions im
    4. [4. Question Answering](#4-question-answering)  
    5. [5. FastAPI Server](#5-fastapi-server)  
 3. [Demo & File Structure](#demo--file-structure)  
-4. [Installation & Usage](#installation--usage)  
-5. [Testing](#testing)  
-6. [License](#license)
 
 ---
 
